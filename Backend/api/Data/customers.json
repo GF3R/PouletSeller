@@ -1,0 +1,20 @@
+[
+  {
+    "id": "29e60774-b426-4817-bb68-21c54eac28ff",
+    "firstName": "Test",
+    "lastName": "Meri",
+    "pouletSpezial": 1,
+    "pouletSpezialStueck": 1,
+    "poulet3kg": 1,
+    "truten5kg": 1,
+    "truten10kg": 1,
+    "address": "Dorf 333",
+    "postalCode": "3762",
+    "city": "Erlenbach i. S.",
+    "umsatzTruten": 0,
+    "umsatzPoulet": 0,
+    "umsatzTotal": 0,
+    "infoChannel": "WhatsApp",
+    "phone": "123565"
+  }
+]

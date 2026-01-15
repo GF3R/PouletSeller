@@ -1,0 +1,41 @@
+{
+  "name": "Angular 19 + .NET 10",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "NODE_VERSION": "20.19.6",
+      "DOTNET_SDK_VERSION": "10.0.101",
+      "ANGULAR_CLI_VERSION": "19"
+    }
+  },
+
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": true,
+
+  "runArgs": [
+    "--cap-drop=ALL",
+    "--security-opt=no-new-privileges",
+    "--pids-limit=512"
+  ],
+
+
+  "remoteEnv": {
+    "OPENAI_API_KEY": "${localEnv:OPENAI_API_KEY}"
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "angular.ng-template",
+        "ms-dotnettools.csharp",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "openai.chatgpt"
+      ]
+    }
+  },
+
+  "forwardPorts": [4200, 5174, 5000, 5001],
+
+  "postCreateCommand": "dotnet --info && node -v && npm -v && ng version"
+}
