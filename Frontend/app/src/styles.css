@@ -1,0 +1,183 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap');
+
+:root {
+  --blue: #004aad;
+  --accent: #1976d2;
+  --green: #008000;
+  --red: #c62828;
+  --bg: #f3f4f6;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Manrope', Arial, sans-serif;
+  background: var(--bg);
+  color: #0f172a;
+}
+
+a {
+  color: var(--blue);
+  text-decoration: none;
+}
+
+header {
+  background: var(--blue);
+  color: white;
+  padding: 16px 24px;
+  box-shadow: var(--shadow);
+}
+
+.page {
+  max-width: 1100px;
+  margin: 24px auto 48px;
+  padding: 0 18px;
+}
+
+.panel {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+
+.grid {
+  display: grid;
+  gap: 14px;
+}
+
+.grid.two {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.grid.three {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.card {
+  background: linear-gradient(135deg, #e9f0ff, #ffffff);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+.btn {
+  background: var(--blue);
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+  box-shadow: var(--shadow);
+}
+
+.btn.secondary {
+  background: var(--accent);
+}
+
+.btn.ghost {
+  background: #eef2ff;
+  color: var(--blue);
+  box-shadow: none;
+}
+
+.btn.danger {
+  background: var(--red);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+label {
+  font-weight: 700;
+  display: block;
+  margin-top: 10px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  margin-top: 6px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+thead {
+  background: var(--blue);
+  color: white;
+  position: sticky;
+  top: 0;
+}
+
+th,
+td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.badge {
+  display: inline-block;
+  background: #e0f2fe;
+  color: #0ea5e9;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pill {
+  background: #ecfdf3;
+  color: #15803d;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  display: inline-block;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.flex {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}

@@ -1,0 +1,19 @@
+<header>
+  <div class="flex" style="justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap;">
+    <div>
+      <div class="badge">Knutti Geflügel</div>
+      <h2 style="margin:6px 0 0">Verkaufs- und Bestelltool</h2>
+    </div>
+    <nav class="toolbar">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="pill">Start</a>
+      <a routerLink="/customers/new" routerLinkActive="active" class="pill">Kunde erfassen</a>
+      <a routerLink="/customers/orders" routerLinkActive="active" class="pill">Bestellungen</a>
+      <a routerLink="/sales" routerLinkActive="active" class="pill">Verkauf</a>
+      <a routerLink="/finance" routerLinkActive="active" class="pill">Buchhaltung</a>
+      <a routerLink="/inventory" routerLinkActive="active" class="pill">Bestand</a>
+    </nav>
+  </div>
+</header>
+<div class="page">
+  <router-outlet></router-outlet>
+</div>
