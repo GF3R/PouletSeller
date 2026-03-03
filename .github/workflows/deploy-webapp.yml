@@ -43,3 +43,5 @@ jobs:
           app_location: "Frontend/app"
           api_location: ""
           output_location: "dist/YOUR_PROJECT_NAME/browser"
+
+      
