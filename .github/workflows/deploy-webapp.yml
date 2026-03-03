@@ -1,92 +1,42 @@
-name: Deploy Frontend and Backend to Azure
+name: Build and Deploy Angular to Azure Static Web Apps
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
   workflow_dispatch:
 
-env:
-  NODE_VERSION: "20.x"
-  DOTNET_VERSION: "10.0.x"
-
 jobs:
-  deploy_frontend:
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository)
+  build_and_deploy:
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
-    permissions:
-      id-token: write
-      contents: read
+    name: Build and Deploy
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-          lfs: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: Frontend/app/package-lock.json
-
-      - name: Build Angular app
-        working-directory: Frontend/app
-        run: |
-          npm ci
-          npm run build
-
-      - name: Verify build output
-        run: |
-          test -d Frontend/app/dist/app/browser
-          ls -la Frontend/app/dist/app/browser
-
-      - name: Validate Static Web App token is configured
-        env:
-          SWA_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN || secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GENTLE_HILL_0DE8FC303 }}
-        run: |
-          if [ -z "$SWA_TOKEN" ]; then
-            echo "Missing GitHub secret: AZURE_STATIC_WEB_APPS_API_TOKEN (or AZURE_STATIC_WEB_APPS_API_TOKEN_GENTLE_HILL_0DE8FC303)"
-            exit 1
-          fi
-
-      - name: Build And Deploy
-        id: builddeploy
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN || secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GENTLE_HILL_0DE8FC303 }}
-          action: "upload"
-          app_location: "Frontend/app/dist/app/browser"
-          api_location: ""
-          output_location: ""
-          skip_app_build: true
-
-  deploy_backend:
-    name: Deploy Backend (Azure Web App)
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-    steps:
+      # Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      # Setup Node
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          node-version: 20
+          cache: 'npm'
 
-      - name: Publish backend
-        run: dotnet publish Backend/api/api.csproj -c Release -o ${{ github.workspace }}/backend-publish
+      # Install dependencies
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Deploy Backend to Azure Web App
-        uses: azure/webapps-deploy@v3
+      # Build Angular app
+      - name: Build Angular app
+        run: npm run build -- --configuration production
+
+      # Deploy to Azure Static Web Apps
+      - name: Deploy
+        uses: Azure/static-web-apps-deploy@v1
         with:
-          app-name: ${{ vars.AZURE_BACKEND_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_BACKEND_WEBAPP_PUBLISH_PROFILE }}
-          package: ${{ github.workspace }}/backend-publish
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GENTLE_HILL_0DE8FC303 }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "/"
+          api_location: ""
+          output_location: "dist/YOUR_PROJECT_NAME/browser"
