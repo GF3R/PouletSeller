@@ -1,4 +1,4 @@
-name: Azure Static Web Apps CI/CD
+name: Deploy Frontend and Backend
 
 on:
   push:
@@ -8,39 +8,117 @@ on:
     types: [opened, synchronize, reopened, closed]
     branches:
       - main
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "20"
+  DOTNET_VERSION: "10.x"
+  BACKEND_PROJECT_PATH: Backend/api/api.csproj
 
 jobs:
-  build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+  deploy_frontend:
+    name: Deploy Frontend (Azure Static Web Apps)
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           submodules: true
           lfs: false
-      - name: Build And Deploy
-        id: builddeploy
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: Frontend/app/package-lock.json
+
+      - name: Install dependencies
+        working-directory: Frontend/app
+        run: npm ci
+
+      - name: Build Angular app
+        working-directory: Frontend/app
+        run: npm run build -- --configuration production
+
+      - name: Verify build output
+        run: |
+          test -d Frontend/app/dist/app/browser
+          ls -la Frontend/app/dist/app/browser
+
+      - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_AMBITIOUS_SKY_025851003 }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
-          action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "./Frontend/app" # App source code path
-          api_location: "" # Api source code path - optional
-          output_location: "dist/app/browser" # Built app content directory - optional
-          ###### End of Repository/Build Configurations ######
+          azure_static_web_apps_api_token: ${{ secrets.DEPLOYMENT_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: upload
+          app_location: Frontend/app
+          api_location: ""
+          output_location: dist/app/browser
 
-  close_pull_request_job:
+  close_frontend_preview:
+    name: Close Frontend Preview
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
-    name: Close Pull Request Job
     steps:
-      - name: Close Pull Request
-        id: closepullrequest
+      - name: Close Pull Request Preview
         uses: Azure/static-web-apps-deploy@v1
         with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_AMBITIOUS_SKY_025851003 }}
-          action: "close"
+          azure_static_web_apps_api_token: ${{ secrets.DEPLOYMENT_TOKEN }}
+          action: close
+
+  build_backend:
+    name: Build Backend
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Build backend
+        run: dotnet build ${{ env.BACKEND_PROJECT_PATH }} --configuration Release
+
+      - name: Publish backend
+        run: dotnet publish ${{ env.BACKEND_PROJECT_PATH }} -c Release -o ${{ github.workspace }}/myapp
+
+      - name: Upload backend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-app
+          path: ${{ github.workspace }}/myapp
+
+  deploy_backend:
+    name: Deploy Backend (Azure Web App)
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    needs: build_backend
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Download backend artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-app
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_1E63E62C75624CC3A973584799691B86 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_A157F5E87C604B8C84E056B807D2601D }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_63AB61B6299A44B18334E0B9EA47103E }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: poulet-app
+          slot-name: Production
+          package: .
