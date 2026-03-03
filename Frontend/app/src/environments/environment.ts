@@ -1,3 +1,3 @@
 export const environment = {
-  baseApiUrl: '/api'
+  baseApiUrl: 'https://poulet-app-febzfmd9dqdgccgt.canadacentral-01.azurewebsites.net/api'
 };
